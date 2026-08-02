@@ -1,0 +1,47 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int M;
+    if (!(cin >> M)) return 0;
+
+    vector<int> mask(M);
+    for (int i = 0; i < M; ++i) {
+        cin >> mask[i];
+    }
+
+    int S, T;
+    cin >> S >> T;
+
+    int target = S ^ T;
+    int min_switches = -1;
+
+    int total_subsets = 1 << M;
+    for (int i = 0; i < total_subsets; ++i) {
+        int current_xor = 0;
+        int count = 0;
+
+        for (int j = 0; j < M; ++j) {
+            if ((i >> j) & 1) {
+                current_xor ^= mask[j];
+                count++;
+            }
+        }
+
+        if (current_xor == target) {
+            if (min_switches == -1 || count < min_switches) {
+                min_switches = count;
+            }
+        }
+    }
+
+    cout << min_switches << "\n";
+
+    return 0;
+}
