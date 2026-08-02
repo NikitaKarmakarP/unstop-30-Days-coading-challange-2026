@@ -1,0 +1,21 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+int main() {
+    string S;
+    char C;
+    
+    if (cin >> S >> C) {
+        int count = 0;
+        for (char ch : S) {
+            if (ch == C) {
+                count++;
+            }
+        }
+        cout << count << endl;
+    }
+    
+    return 0;
+}
