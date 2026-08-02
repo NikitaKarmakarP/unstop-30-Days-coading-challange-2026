@@ -1,0 +1,61 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+static const long long LIMIT_VAL = 3e18;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int node_count, edge_count, query_count;
+    if (!(cin >> node_count >> edge_count >> query_count)) return 0;
+
+    vector<vector<long long>> path_cost(node_count + 1, vector<long long>(node_count + 1, LIMIT_VAL));
+
+    for (int p = 1; p <= node_count; ++p) {
+        path_cost[p][p] = 0;
+    }
+
+    for (int e = 0; e < edge_count; ++e) {
+        int left_node, right_node;
+        long long energy;
+        cin >> left_node >> right_node >> energy;
+        
+        path_cost[left_node][right_node] = min(path_cost[left_node][right_node], energy);
+        path_cost[right_node][left_node] = min(path_cost[right_node][left_node], energy);
+    }
+
+    for (int mid = 1; mid <= node_count; ++mid) {
+        for (int src = 1; src <= node_count; ++src) {
+            long long leg1 = path_cost[src][mid];
+            if (leg1 >= LIMIT_VAL) continue;
+
+            for (int dst = 1; dst <= node_count; ++dst) {
+                long long leg2 = path_cost[mid][dst];
+                if (leg2 < LIMIT_VAL) {
+                    long long total = leg1 + leg2;
+                    if (total < path_cost[src][dst]) {
+                        path_cost[src][dst] = total;
+                    }
+                }
+            }
+        }
+    }
+
+    for (int idx = 0; idx < query_count; ++idx) {
+        int start_world, end_world;
+        cin >> start_world >> end_world;
+
+        long long final_cost = path_cost[start_world][end_world];
+        if (final_cost >= LIMIT_VAL) {
+            cout << -1 << "\n";
+        } else {
+            cout << final_cost << "\n";
+        }
+    }
+
+    return 0;
+}
