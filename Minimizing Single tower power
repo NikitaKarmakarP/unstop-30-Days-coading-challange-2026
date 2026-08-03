@@ -1,0 +1,48 @@
+#include <iostream>
+#include <algorithm>
+
+using namespace std;
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int total_houses;
+    if (!(cin >> total_houses)) return 0;
+
+    long long house_positions[total_houses];
+    for (int idx = 0; idx < total_houses; ++idx) {
+        cin >> house_positions[idx];
+    }
+
+    long long peak_threshold = 0;
+    long long upper_bound_val = 0;
+    long long lower_bound_val = 0;
+
+    for (int idx = 0; idx < total_houses; ++idx) {
+        long long current_thresh;
+        cin >> current_thresh;
+
+        peak_threshold = max(peak_threshold, current_thresh);
+
+        long long pos_plus_thresh = house_positions[idx] + current_thresh;
+        long long pos_minus_thresh = house_positions[idx] - current_thresh;
+
+        if (idx == 0) {
+            upper_bound_val = pos_plus_thresh;
+            lower_bound_val = pos_minus_thresh;
+        } else {
+            upper_bound_val = max(upper_bound_val, pos_plus_thresh);
+            lower_bound_val = min(lower_bound_val, pos_minus_thresh);
+        }
+    }
+
+    long long interval_span = upper_bound_val - lower_bound_val;
+    long long required_power = (interval_span + 1) / 2;
+
+    long long final_power = max(peak_threshold, required_power);
+
+    cout << final_power << "\n";
+
+    return 0;
+}
