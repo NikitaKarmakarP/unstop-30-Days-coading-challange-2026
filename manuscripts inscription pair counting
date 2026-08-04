@@ -1,0 +1,69 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+struct Node {
+    int next_letter[26] = {0};
+    long long occurrences = 0;
+};
+
+vector<Node> tree(2);
+
+void push_word(const string& text) {
+    int active = 1;
+    for (char symbol : text) {
+        int pos = symbol - 'a';
+        if (!tree[active].next_letter[pos]) {
+            tree.push_back(Node());
+            tree[active].next_letter[pos] = tree.size() - 1;
+        }
+        active = tree[active].next_letter[pos];
+        tree[active].occurrences++;
+    }
+}
+
+long long check_prefix(const string& target) {
+    int active = 1;
+    for (char symbol : target) {
+        int pos = symbol - 'a';
+        if (!tree[active].next_letter[pos]) {
+            return 0;
+        }
+        active = tree[active].next_letter[pos];
+    }
+    return tree[active].occurrences;
+}
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n;
+    if (!(cin >> n)) return 0;
+
+    for (int i = 0; i < n; ++i) {
+        string str;
+        cin >> str;
+        push_word(str);
+    }
+
+    int q;
+    cin >> q;
+
+    while (q--) {
+        string pattern;
+        cin >> pattern;
+
+        long long cnt = check_prefix(pattern);
+
+        if (cnt < 2) {
+            cout << 0 << "\n";
+        } else {
+            cout << (cnt * (cnt - 1)) / 2 << "\n";
+        }
+    }
+
+    return 0;
+}
