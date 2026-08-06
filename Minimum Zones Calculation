@@ -1,0 +1,50 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+int cmp(const void *a, const void *b) {
+    return (*(int *)a - *(int *)b);
+}
+
+int minimum_zones(int teams[][2], int n) {
+    int start[n], end[n];
+
+    for (int i = 0; i < n; i++) {
+        start[i] = teams[i][0];
+        end[i] = teams[i][1];
+    }
+
+    qsort(start, n, sizeof(int), cmp);
+    qsort(end, n, sizeof(int), cmp);
+
+    int i = 0, j = 0;
+    int current = 0, ans = 0;
+
+    while (i < n) {
+        if (start[i] < end[j]) {
+            current++;
+            if (current > ans)
+                ans = current;
+            i++;
+        } else {
+            current--;
+            j++;
+        }
+    }
+
+    return ans;
+}
+
+int main() {
+    int n;
+    scanf("%d", &n);
+
+    int teams[n][2];
+
+    for (int i = 0; i < n; i++) {
+        scanf("%d %d", &teams[i][0], &teams[i][1]);
+    }
+
+    printf("%d\n", minimum_zones(teams, n));
+
+    return 0;
+}
