@@ -1,0 +1,158 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Fenwick {
+    int n;
+    vector<int> bit;
+
+public:
+    Fenwick(int n) : n(n), bit(n + 1, 0) {}
+
+    void add(int idx, int val) {
+        for (; idx <= n; idx += idx & -idx)
+            bit[idx] += val;
+    }
+
+    int sum(int idx) const {
+        int res = 0;
+        for (; idx > 0; idx -= idx & -idx)
+            res += bit[idx];
+        return res;
+    }
+
+    int total() const {
+        return sum(n);
+    }
+
+    // Returns the smallest index whose prefix sum >= k.
+    int kth(int k) const {
+        int idx = 0;
+
+        int step = 1;
+        while ((step << 1) <= n)
+            step <<= 1;
+
+        for (; step > 0; step >>= 1) {
+            int next = idx + step;
+
+            if (next <= n && bit[next] < k) {
+                idx = next;
+                k -= bit[next];
+            }
+        }
+
+        return idx + 1;
+    }
+};
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int Q;
+    cin >> Q;
+
+    vector<pair<string, long long>> operations;
+    vector<long long> values;
+
+    operations.reserve(Q);
+    values.reserve(Q);
+
+    // Read all operations first for coordinate compression.
+    for (int i = 0; i < Q; ++i) {
+        string cmd;
+        long long x;
+
+        cin >> cmd >> x;
+
+        operations.push_back({cmd, x});
+
+        // X is relevant for coordinate compression.
+        if (cmd != "POSITION")
+            values.push_back(x);
+    }
+
+    // Coordinate compression.
+    sort(values.begin(), values.end());
+    values.erase(unique(values.begin(), values.end()), values.end());
+
+    Fenwick fw((int)values.size());
+
+    // Converts a decree value into its compressed 1-based index.
+    auto getIndex = [&](long long x) {
+        return (int)(lower_bound(values.begin(), values.end(), x) - values.begin()) + 1;
+    };
+
+    for (auto &[cmd, x] : operations) {
+
+        if (cmd == "ADD") {
+            int idx = getIndex(x);
+
+            // Only add if it does not already exist.
+            if (fw.sum(idx) - fw.sum(idx - 1) == 0) {
+                fw.add(idx, 1);
+            }
+        }
+
+        else if (cmd == "REMOVE") {
+            int idx = getIndex(x);
+
+            // Remove only if currently present.
+            if (fw.sum(idx) - fw.sum(idx - 1) == 1) {
+                fw.add(idx, -1);
+            }
+        }
+
+        else if (cmd == "EXISTS") {
+            int idx = getIndex(x);
+
+            int present = fw.sum(idx) - fw.sum(idx - 1);
+
+            cout << (present ? "YES" : "NO") << '\n';
+        }
+
+        else if (cmd == "BEFORE") {
+            int idx = getIndex(x);
+
+            // Number of elements strictly smaller than x.
+            int cnt = fw.sum(idx - 1);
+
+            if (cnt == 0) {
+                cout << "NONE\n";
+            } else {
+                int pos = fw.kth(cnt);
+                cout << values[pos - 1] << '\n';
+            }
+        }
+
+        else if (cmd == "AFTER") {
+            int idx = getIndex(x);
+
+            // Number of elements <= x.
+            int cnt = fw.sum(idx);
+            int total = fw.total();
+
+            if (cnt == total) {
+                cout << "NONE\n";
+            } else {
+                // The next element after x is the (cnt + 1)-th element.
+                int pos = fw.kth(cnt + 1);
+                cout << values[pos - 1] << '\n';
+            }
+        }
+
+        else if (cmd == "POSITION") {
+            int k = (int)x;
+            int total = fw.total();
+
+            if (k <= 0 || k > total) {
+                cout << "NONE\n";
+            } else {
+                int pos = fw.kth(k);
+                cout << values[pos - 1] << '\n';
+            }
+        }
+    }
+
+    return 0;
+}
