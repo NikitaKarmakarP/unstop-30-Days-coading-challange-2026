@@ -1,0 +1,43 @@
+#include <cmath>
+#include <cstdio>
+#include <vector>
+#include <iostream>
+#include <algorithm>
+#include <queue>
+
+using namespace std;
+
+int main() {
+    int N;
+    cin >> N;
+
+    vector<pair<int, int>> jobs(N);
+
+    for (int i = 0; i < N; i++) {
+        int D, C;
+        cin >> D >> C;
+        jobs[i] = {D, C};
+    }
+
+    
+    sort(jobs.begin(), jobs.end());
+
+
+    priority_queue<int, vector<int>, greater<int>> pq;
+
+    long long total = 0;
+
+    for (auto [deadline, crates] : jobs) {
+        pq.push(crates);
+        total += crates;
+
+        if ((int)pq.size() > deadline) {
+            total -= pq.top();
+            pq.pop();
+        }
+    }
+
+    cout << total << '\n';
+
+    return 0;
+}
