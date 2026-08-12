@@ -1,0 +1,36 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N, K;
+    cin >> N >> K;
+
+    unordered_set<int> values;
+
+    for (int i = 0; i < N; i++) {
+        int x;
+        cin >> x;
+
+        if (x != -1) {
+            values.insert(x);
+        }
+    }
+
+    
+    for (int d = 1; K - d > 0; d++) {
+        int X = K - d;
+        int Y = K + d;
+
+        if (values.count(X) && values.count(Y)) {
+            cout << X << " " << Y << '\n';
+            return 0;
+        }
+    }
+
+    cout << -1 << '\n';
+
+    return 0;
+}
