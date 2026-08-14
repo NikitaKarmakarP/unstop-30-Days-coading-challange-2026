@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int n, m, k;
+    cin >> n >> m >> k;
+
+    vector<vector<int>> adj(n + 1);
+
+    for (int i = 0; i < m; i++) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    // best[v] = maximum remaining power with which v has been reached
+    vector<long long> best(n + 1, -1);
+
+    // Max heap: {remaining power, town}
+    priority_queue<pair<long long, int>> pq;
+
+    for (int i = 0; i < k; i++) {
+        int t;
+        long long p;
+        cin >> t >> p;
+
+        // Multiple towers can be at the same town.
+        if (p > best[t]) {
+            best[t] = p;
+            pq.push({p, t});
+        }
+    }
+
+    int covered = 0;
+
+    while (!pq.empty()) {
+        auto [power, u] = pq.top();
+        pq.pop();
+
+        // Ignore an outdated state.
+        if (power != best[u])
+            continue;
+
+        covered++;
+
+        if (power == 0)
+            continue;
+
+        for (int v : adj[u]) {
+            long long newPower = power - 1;
+
+            if (newPower > best[v]) {
+                best[v] = newPower;
+                pq.push({newPower, v});
+            }
+        }
+    }
+
+    cout << covered << '\n';
+
+    return 0;
+}
