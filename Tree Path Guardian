@@ -1,0 +1,111 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+struct Frame {
+    int u;
+    int p;
+    int edge_idx;
+    int insert_idx;
+    int old_top;
+    pair<int, int> old_elem;
+};
+
+int main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+
+    int n;
+    if (!(cin >> n)) return 0;
+
+    vector<vector<int>> adj(n + 1);
+    for (int i = 0; i < n - 1; ++i) {
+        int u, v;
+        cin >> u >> v;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+
+    vector<int> a(n + 1);
+    for (int i = 1; i <= n; ++i) {
+        cin >> a[i];
+    }
+
+    vector<int> guardian(n + 1, -1);
+    vector<pair<int, int>> stk(n + 5);
+    int top_ptr = 0;
+
+    vector<Frame> call_stack;
+    call_stack.reserve(n + 5);
+
+    auto enter_node = [&](int u, int p) -> Frame {
+        if (top_ptr > 0 && stk[0].first > a[u]) {
+            int l = 0, r = top_ptr - 1;
+            int best_id = -1;
+            while (l <= r) {
+                int mid = l + (r - l) / 2;
+                if (stk[mid].first > a[u]) {
+                    best_id = stk[mid].second;
+                    l = mid + 1;
+                } else {
+                    r = mid - 1;
+                }
+            }
+            guardian[u] = best_id;
+        } else {
+            guardian[u] = -1;
+        }
+
+        int insert_idx = top_ptr;
+        int l = 0, r = top_ptr - 1;
+        while (l <= r) {
+            int mid = l + (r - l) / 2;
+            if (stk[mid].first <= a[u]) {
+                insert_idx = mid;
+                r = mid - 1;
+            } else {
+                l = mid + 1;
+            }
+        }
+
+        Frame f;
+        f.u = u;
+        f.p = p;
+        f.edge_idx = 0;
+        f.insert_idx = insert_idx;
+        f.old_top = top_ptr;
+        f.old_elem = stk[insert_idx];
+
+        stk[insert_idx] = {a[u], u};
+        top_ptr = insert_idx + 1;
+
+        return f;
+    };
+
+    call_stack.push_back(enter_node(1, 0));
+
+    while (!call_stack.empty()) {
+        Frame &curr = call_stack.back();
+        int u = curr.u;
+        int p = curr.p;
+
+        if (curr.edge_idx < (int)adj[u].size()) {
+            int v = adj[u][curr.edge_idx++];
+            if (v != p) {
+                call_stack.push_back(enter_node(v, u));
+            }
+        } else {
+            stk[curr.insert_idx] = curr.old_elem;
+            top_ptr = curr.old_top;
+            call_stack.pop_back();
+        }
+    }
+
+    for (int i = 1; i <= n; ++i) {
+        cout << guardian[i] << (i == n ? '\n' : ' ');
+    }
+
+    return 0;
+}
