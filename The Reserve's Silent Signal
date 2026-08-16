@@ -1,0 +1,89 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+using ll = long long;
+
+struct Point {
+    ll x, y;
+};
+
+ll dist2(const Point& a, const Point& b) {
+    ll dx = a.x - b.x;
+    ll dy = a.y - b.y;
+    return dx * dx + dy * dy;
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N;
+    cin >> N;
+
+    vector<Point> p(N);
+
+    for (int i = 0; i < N; i++) {
+        cin >> p[i].x >> p[i].y;
+    }
+
+    // Sort by x-coordinate
+    sort(p.begin(), p.end(), [](const Point& a, const Point& b) {
+        if (a.x != b.x)
+            return a.x < b.x;
+        return a.y < b.y;
+    });
+
+    // Set sorted by (y, x)
+    set<pair<ll, ll>> active;
+
+    ll ans = LLONG_MAX;
+
+    int left = 0;
+
+    for (int i = 0; i < N; i++) {
+
+        // Remove points whose x-distance is too large
+        while (left < i) {
+            ll dx = p[i].x - p[left].x;
+
+            // If dx^2 >= ans, this point cannot improve the answer
+            if (dx * dx >= ans) {
+                active.erase({p[left].y, p[left].x});
+                left++;
+            } else {
+                break;
+            }
+        }
+
+        // If duplicate point exists
+        if (active.count({p[i].y, p[i].x})) {
+            cout << 0 << '\n';
+            return 0;
+        }
+
+        // Current vertical range: y - sqrt(ans) to y + sqrt(ans)
+        ll d = sqrt((long double)ans);
+
+        auto it = active.lower_bound({p[i].y - d, LLONG_MIN});
+
+        while (it != active.end() && it->first <= p[i].y + d) {
+
+            Point other{it->second, it->first};
+
+            ans = min(ans, dist2(p[i], other));
+
+            if (ans == 0) {
+                cout << 0 << '\n';
+                return 0;
+            }
+
+            ++it;
+        }
+
+        active.insert({p[i].y, p[i].x});
+    }
+
+    cout << ans << '\n';
+
+    return 0;
+}
