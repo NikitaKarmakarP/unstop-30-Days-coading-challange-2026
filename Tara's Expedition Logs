@@ -1,0 +1,55 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+long long countArrangements(int n, long long k, const vector<long long>& sightings) {
+    const long long MOD = 1000000007LL;
+
+    // dp[i] = number of ways to split the first i days
+    vector<long long> dp(n + 1, 0);
+
+    dp[0] = 1;
+
+    long long windowSum = 0;
+    long long currentSum = 0;
+    int left = 0;
+
+    for (int right = 0; right < n; right++) {
+        currentSum += sightings[right];
+
+        // Remove invalid starting positions
+        while (left <= right && currentSum > k) {
+            currentSum -= sightings[left];
+
+            // dp[left] is no longer part of the valid range
+            windowSum = (windowSum - dp[left] + MOD) % MOD;
+            left++;
+        }
+
+        // Add dp[right] as a possible previous partition point
+        windowSum = (windowSum + dp[right]) % MOD;
+
+        // dp[right + 1] = sum of dp[left ... right]
+        dp[right + 1] = windowSum;
+    }
+
+    return dp[n];
+}
+
+int main() {
+    int n;
+    long long k;
+
+    cin >> n >> k;
+
+    vector<long long> sightings(n);
+
+    for (int i = 0; i < n; i++) {
+        cin >> sightings[i];
+    }
+
+    cout << countArrangements(n, k, sightings) << '\n';
+
+    return 0;
+}
