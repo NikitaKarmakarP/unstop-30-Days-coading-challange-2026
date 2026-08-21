@@ -1,0 +1,50 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, m;
+    cin >> n >> m;
+
+    vector<long long> a(n);
+
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    deque<int> mn, mx;
+
+    long long ans = LLONG_MAX;
+    int position = 1;
+
+    for (int i = 0; i < n; i++) {
+
+        while (!mn.empty() && a[mn.back()] >= a[i])
+            mn.pop_back();
+
+        while (!mx.empty() && a[mx.back()] <= a[i])
+            mx.pop_back();
+
+        mn.push_back(i);
+        mx.push_back(i);
+
+        if (mn.front() <= i - m)
+            mn.pop_front();
+
+        if (mx.front() <= i - m)
+            mx.pop_front();
+
+        if (i >= m - 1) {
+            long long diff = a[mx.front()] - a[mn.front()];
+            int start = i - m + 2;
+
+            if (diff < ans) {
+                ans = diff;
+                position = start;
+            }
+        }
+    }
+
+    cout << ans << " " << position;
+
+    return 0;
+}
